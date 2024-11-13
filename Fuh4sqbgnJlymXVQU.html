@@ -1,0 +1,829 @@
+<html><head><base href="." />
+<style>
+:root {
+  --candy-pink: #ff69b4;
+  --candy-light: #ffb6c1;
+  --candy-dark: #ff1493;
+  --bg-color: #ffe4e1;
+  --piece-color: #ff69b4; /* Pink color for the blocks */
+  --piece-border: #ff1493; /* Darker pink for block borders */
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  font-family: 'Comic Sans MS', cursive;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  overflow-y: hidden;
+  justify-content: center;
+}
+
+html {
+  overflow-y: hidden;
+}
+
+.start-button {
+  background-color: var(--candy-pink);
+  border: none;
+  border-radius: 15px;
+  padding: 15px 30px;
+  font-size: 20px;
+  color: white;
+  cursor: pointer;
+  font-family: 'Comic Sans MS', cursive;
+  margin: 20px 0;
+  box-shadow: 0 4px var(--candy-dark);
+  transition: transform 0.1s;
+}
+
+.start-button:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px var(--candy-dark);
+}
+
+.start-button:active {
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+.game-layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.game-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-container {
+  background: white;
+  border: 10px solid var(--candy-pink);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
+  transition: opacity 0.3s;
+  max-height: 80vh;
+  display: flex;
+  align-items: center;
+}
+
+.game-inactive {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.game-paused {
+  filter: blur(3px);
+  opacity: 0.7;
+}
+
+.grid {
+  width: min(300px, 30vh);
+  height: min(600px, 60vh);
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(20, 1fr);
+  gap: 1px;
+  background-color: #ffd1dc;
+}
+
+.cell {
+  width: auto;
+  height: auto;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  aspect-ratio: 1;
+}
+
+.cell.piece {
+  background-color: var(--piece-color);
+  border: 2px solid var(--piece-border);
+  box-shadow: inset 2px 2px rgba(255,255,255,0.3), 
+              inset -2px -2px rgba(0,0,0,0.2);
+}
+
+.score {
+  font-size: 18px;
+  color: var(--candy-dark);
+  margin: 5px 0;
+  background: white;
+  border: 5px solid var(--candy-pink);
+  border-radius: 10px;
+  padding: 10px;
+  width: min(250px, 20vw);
+  text-align: center;
+}
+
+.controls {
+  margin-top: 20px;
+  color: var(--candy-dark);
+  width: min(250px, 20vw);
+}
+
+.scoreboard {
+  background: white;
+  border: 5px solid var(--candy-pink);
+  border-radius: 10px;
+  padding: 15px;
+  margin: 20px 0;
+  min-width: 200px;
+}
+
+.scoreboard h2 {
+  color: var(--candy-dark);
+  text-align: center;
+  margin: 0 0 10px 0;
+}
+
+.high-scores {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.high-scores li {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 10px;
+  color: var(--candy-dark);
+  border-bottom: 1px dashed var(--candy-light);
+}
+
+.high-scores li:last-child {
+  border-bottom: none;
+}
+
+.boxes-right {
+  display: flex;
+  flex-direction: column;
+  gap: min(10px, 1vh);
+  margin-left: min(20px, 2vw);
+  align-items: center;
+}
+
+.hold-container {
+  background: white;
+  border: 5px solid var(--candy-pink);
+  border-radius: 10px;
+  width: min(100px, 10vw);
+  height: min(100px, 10vw);
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.hold-container::before {
+  content: 'HOLD';
+  position: absolute;
+  top: -25px;
+  color: var(--candy-dark);
+  font-weight: bold;
+}
+
+.hold-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 20px);
+  grid-template-rows: repeat(4, 20px);
+  gap: 1px;
+  background-color: #ffd1dc;
+}
+
+.hold-cell {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.next-container {
+  background: white;
+  border: 5px solid var(--candy-pink);
+  border-radius: 10px;
+  width: min(100px, 10vw);
+  height: min(100px, 10vw);
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.next-container::before {
+  content: 'NEXT';
+  position: absolute;
+  top: -25px;
+  color: var(--candy-dark);
+  font-weight: bold;
+}
+
+.next-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 20px);
+  grid-template-rows: repeat(4, 20px);
+  gap: 1px;
+  background-color: #ffd1dc;
+}
+
+.next-cell {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.boxes-right .start-button {
+  width: 100px;
+  padding: 10px;
+  font-size: 16px;
+  margin: 5px 0;
+}
+
+.next-cell.piece,
+.hold-cell.piece {
+  background-color: var(--piece-color);
+  border: 2px solid var(--piece-border);
+  box-shadow: inset 2px 2px rgba(255,255,255,0.3), 
+              inset -2px -2px rgba(0,0,0,0.2);
+}
+
+.countdown {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 72px;
+  color: var(--candy-dark);
+  font-weight: bold;
+  animation: countdownPulse 1s ease-in-out;
+  z-index: 10;
+}
+
+@keyframes countdownPulse {
+  0% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+  50% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+}
+</style>
+</head>
+<body>
+<h1 style="color: var(--candy-dark)">🍬 Candy Tetris 🍬</h1>
+
+<audio id="moveSound" preload="auto">
+  <source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg">
+</audio>
+<audio id="rotateSound" preload="auto">
+  <source src="https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3" type="audio/mpeg">
+</audio>
+<audio id="dropSound" preload="auto">
+  <source src="https://assets.mixkit.co/active_storage/sfx/2573/2573-preview.mp3" type="audio/mpeg">
+</audio>
+<audio id="clearSound" preload="auto">
+  <source src="https://assets.mixkit.co/active_storage/sfx/2574/2574-preview.mp3" type="audio/mpeg">
+</audio>
+
+<div class="game-layout">
+  <div class="game-left">
+    <div class="scoreboard">
+      <h2>🏆 High Scores 🏆</h2>
+      <ol class="high-scores" id="highScores">
+        <li><span>Candy Queen</span><span>1000</span></li>
+        <li><span>Sweet Master</span><span>800</span></li>
+        <li><span>Sugar Rush</span><span>600</span></li>
+        <li><span>Candy Crush</span><span>400</span></li>
+        <li><span>Gummy Bear</span><span>200</span></li>
+      </ol>
+    </div>
+    
+    <div class="controls" style="background: white; border: 5px solid var(--candy-pink); border-radius: 10px; padding: 15px; margin-top: 20px; min-width: 200px;">
+      <h2 style="color: var(--candy-dark); text-align: center; margin: 0 0 10px 0;">🎮 Controls 🎮</h2>
+      Use ← → to move<br>
+      ↑ to rotate<br>
+      ↓ to drop faster<br>
+      C to hold current piece
+    </div>
+  </div>
+  
+  <div class="game-center">
+    <div style="display: flex; align-items: flex-start;">
+      <div class="game-container game-inactive">
+        <div class="grid" id="grid"></div>
+      </div>
+      <div class="boxes-right">
+        <div class="next-container">
+          <div class="next-grid" id="nextGrid"></div>
+        </div>
+        <div class="hold-container">
+          <div class="hold-grid" id="holdGrid"></div>
+        </div>
+        <button id="startButton" class="start-button">Start Game!</button>
+        <button id="startAgainButton" class="start-button" style="display: none;">Start Again</button>
+        <button id="pauseButton" class="start-button" style="display: none;">Pause</button>
+        <div class="score">Score: <span id="score">0</span> | Level: <span id="level">1</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const GRID_WIDTH = 10;
+const GRID_HEIGHT = 20;
+let score = 0;
+let level = 1;
+let linesCleared = 0;
+const LINES_PER_LEVEL = 10;
+const BASE_SPEED = 500;
+let currentPiece = null;
+let nextPiece = null;
+let grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(0));
+let gameInterval;
+let gameActive = false;
+let isPaused = false;
+
+const PIECES = [
+  [[1,1,1,1]], // I
+  [[1,1],[1,1]], // O
+  [[1,1,1],[0,1,0]], // T
+  [[1,1,1],[1,0,0]], // L
+  [[1,1,1],[0,0,1]], // J
+  [[1,1,0],[0,1,1]], // S
+  [[0,1,1],[1,1,0]]  // Z
+];
+
+function createGrid() {
+  const gridElement = document.getElementById('grid');
+  for (let i = 0; i < GRID_HEIGHT; i++) {
+    for (let j = 0; j < GRID_WIDTH; j++) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.setAttribute('data-row', i);
+      cell.setAttribute('data-col', j);
+      gridElement.appendChild(cell);
+    }
+  }
+}
+
+function updateGrid() {
+  const cells = document.getElementsByClassName('cell');
+  for (let i = 0; i < GRID_HEIGHT; i++) {
+    for (let j = 0; j < GRID_WIDTH; j++) {
+      const cell = cells[i * GRID_WIDTH + j];
+      cell.classList.toggle('piece', grid[i][j] === 1);
+    }
+  }
+}
+
+function createNextGrid() {
+  const nextGrid = document.getElementById('nextGrid');
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      const cell = document.createElement('div');
+      cell.classList.add('next-cell');
+      cell.setAttribute('data-next-row', i);
+      cell.setAttribute('data-next-col', j);
+      nextGrid.appendChild(cell);
+    }
+  }
+}
+
+function updateNextPiece() {
+  const nextCells = document.querySelectorAll('.next-cell');
+  nextCells.forEach(cell => cell.classList.remove('piece'));
+
+  if (nextPiece) {
+    const offsetY = Math.floor((4 - nextPiece.length) / 2);
+    const offsetX = Math.floor((4 - nextPiece[0].length) / 2);
+    
+    for (let i = 0; i < nextPiece.length; i++) {
+      for (let j = 0; j < nextPiece[i].length; j++) {
+        if (nextPiece[i][j]) {
+          const cell = document.querySelector(
+            `[data-next-row="${i + offsetY}"][data-next-col="${j + offsetX}"]`
+          );
+          if (cell) cell.classList.add('piece');
+        }
+      }
+    }
+  }
+}
+
+function createPiece() {
+  if (!nextPiece) {
+    nextPiece = PIECES[Math.floor(Math.random() * PIECES.length)];
+  }
+  
+  const pieceType = nextPiece;
+  currentPiece = {
+    shape: pieceType,
+    x: Math.floor((GRID_WIDTH - pieceType[0].length) / 2),
+    y: 0
+  };
+  
+  nextPiece = PIECES[Math.floor(Math.random() * PIECES.length)];
+  updateNextPiece();
+  canHold = true;
+}
+
+function canMove(dx, dy) {
+  const shape = currentPiece.shape;
+  for (let i = 0; i < shape.length; i++) {
+    for (let j = 0; j < shape[i].length; j++) {
+      if (shape[i][j]) {
+        const newX = currentPiece.x + j + dx;
+        const newY = currentPiece.y + i + dy;
+        if (newX < 0 || newX >= GRID_WIDTH || newY >= GRID_HEIGHT) return false;
+        if (newY >= 0 && grid[newY][newX]) return false;
+      }
+    }
+  }
+  return true;
+}
+
+function mergePiece() {
+  const shape = currentPiece.shape;
+  for (let i = 0; i < shape.length; i++) {
+    for (let j = 0; j < shape[i].length; j++) {
+      if (shape[i][j]) {
+        const y = currentPiece.y + i;
+        if (y >= 0) {
+          grid[y][currentPiece.x + j] = 1;
+        }
+      }
+    }
+  }
+}
+
+function clearLines() {
+  let clearedInThisTurn = 0;
+  for (let i = GRID_HEIGHT - 1; i >= 0; i--) {
+    if (grid[i].every(cell => cell === 1)) {
+      grid.splice(i, 1);
+      grid.unshift(Array(GRID_WIDTH).fill(0));
+      clearedInThisTurn++;
+      linesCleared++;
+      
+      if (linesCleared >= LINES_PER_LEVEL * level) {
+        level++;
+        document.getElementById('level').textContent = level;
+        updateGameSpeed();
+      }
+    }
+  }
+  
+  if (clearedInThisTurn > 0) {
+    playClearSound();
+    const points = clearedInThisTurn * 100 * level;
+    score += points;
+    document.getElementById('score').textContent = score;
+  }
+  
+  canHold = true;
+}
+
+function rotatePiece() {
+  const newShape = currentPiece.shape[0].map((_, i) =>
+    currentPiece.shape.map(row => row[i]).reverse()
+  );
+
+  const oldShape = currentPiece.shape;
+  currentPiece.shape = newShape;
+
+  if (!canMove(0, 0)) {
+    currentPiece.shape = oldShape;
+  }
+}
+
+let holdPiece = null;
+let canHold = true;
+
+function createHoldGrid() {
+  const holdGrid = document.getElementById('holdGrid');
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      const cell = document.createElement('div');
+      cell.classList.add('hold-cell');
+      cell.setAttribute('data-hold-row', i);
+      cell.setAttribute('data-hold-col', j);
+      holdGrid.appendChild(cell);
+    }
+  }
+}
+
+function updateHoldPiece() {
+  const holdCells = document.querySelectorAll('.hold-cell');
+  holdCells.forEach(cell => cell.classList.remove('piece'));
+
+  if (holdPiece) {
+    const offsetY = Math.floor((4 - holdPiece.length) / 2);
+    const offsetX = Math.floor((4 - holdPiece[0].length) / 2);
+    
+    for (let i = 0; i < holdPiece.length; i++) {
+      for (let j = 0; j < holdPiece[i].length; j++) {
+        if (holdPiece[i][j]) {
+          const cell = document.querySelector(
+            `[data-hold-row="${i + offsetY}"][data-hold-col="${j + offsetX}"]`
+          );
+          if (cell) cell.classList.add('piece');
+        }
+      }
+    }
+  }
+}
+
+function holdCurrentPiece() {
+  if (!canHold || !currentPiece) return;
+  
+  const currentShape = currentPiece.shape;
+  if (holdPiece === null) {
+    holdPiece = currentShape;
+    createPiece();
+  } else {
+    const tempPiece = holdPiece;
+    holdPiece = currentShape;
+    currentPiece = {
+      shape: tempPiece,
+      x: Math.floor((GRID_WIDTH - tempPiece[0].length) / 2),
+      y: 0
+    };
+  }
+  canHold = false;
+  updateHoldPiece();
+}
+
+function updateHighScores(newScore) {
+  const highScores = Array.from(document.querySelectorAll('.high-scores li span:last-child'))
+    .map(span => parseInt(span.textContent));
+  
+  if (newScore > Math.min(...highScores)) {
+    const playerName = prompt('New high score! Enter your name:');
+    if (playerName) {
+      highScores.push(newScore);
+      highScores.sort((a, b) => b - a);
+      highScores.pop();
+      
+      const highScoresList = document.getElementById('highScores');
+      highScoresList.innerHTML = '';
+      
+      const names = ['Candy Queen', 'Sweet Master', 'Sugar Rush', 'Candy Crush', 'Gummy Bear'];
+      highScores.forEach((score, index) => {
+        const li = document.createElement('li');
+        const name = score === newScore ? playerName : names[index];
+        li.innerHTML = `<span>${name}</span><span>${score}</span>`;
+        highScoresList.appendChild(li);
+      });
+    }
+  }
+}
+
+function updateGameSpeed() {
+  clearInterval(gameInterval);
+  const speed = Math.max(BASE_SPEED - (level - 1) * 50, 100);
+  gameInterval = setInterval(gameLoop, speed);
+}
+
+function initGame() {
+  clearInterval(gameInterval);
+  level = 1;
+  score = 0;
+  linesCleared = 0;
+  grid = Array(GRID_HEIGHT).fill().map(() => Array(GRID_WIDTH).fill(0));
+  document.getElementById('level').textContent = level;
+  document.getElementById('score').textContent = score;
+  currentPiece = null;
+  nextPiece = null;
+  holdPiece = null;
+  canHold = true;
+  clearAllCells();
+  updateNextPiece();
+  updateHoldPiece();
+}
+
+function startGame() {
+  if (gameActive) return;
+  
+  document.querySelector('.game-container').classList.remove('game-inactive');
+  document.getElementById('startButton').style.display = 'none';
+  document.getElementById('startAgainButton').style.display = 'block';
+  document.getElementById('pauseButton').style.display = 'block';
+  
+  // Start countdown
+  const gameContainer = document.querySelector('.game-container');
+  let count = 3;
+  
+  function showNumber() {
+    const countDiv = document.createElement('div');
+    countDiv.className = 'countdown';
+    countDiv.textContent = count;
+    gameContainer.appendChild(countDiv);
+    
+    setTimeout(() => {
+      countDiv.remove();
+      count--;
+      if (count > 0) {
+        showNumber();
+      } else {
+        // Show GO! message
+        const goDiv = document.createElement('div');
+        goDiv.className = 'countdown';
+        goDiv.textContent = 'GO!';
+        gameContainer.appendChild(goDiv);
+        
+        setTimeout(() => {
+          goDiv.remove();
+          // Actually start the game
+          gameActive = true;
+          isPaused = false;
+          initGame();
+          updateGameSpeed();
+        }, 1000);
+      }
+    }, 1000);
+  }
+  
+  showNumber();
+}
+
+function togglePause() {
+  if (!gameActive) return;
+  
+  isPaused = !isPaused;
+  const pauseButton = document.getElementById('pauseButton');
+  const gameContainer = document.querySelector('.game-container');
+  
+  if (isPaused) {
+    clearInterval(gameInterval);
+    pauseButton.textContent = 'Resume';
+    gameContainer.classList.add('game-paused');
+  } else {
+    updateGameSpeed();
+    pauseButton.textContent = 'Pause';
+    gameContainer.classList.remove('game-paused');
+  }
+}
+
+function gameOver() {
+  clearInterval(gameInterval);
+  gameActive = false;
+  isPaused = false;
+  updateHighScores(score);
+  alert('Game Over! Score: ' + score);
+  document.querySelector('.game-container').classList.add('game-inactive');
+  document.getElementById('startButton').style.display = 'block';
+  document.getElementById('startAgainButton').style.display = 'none';
+  document.getElementById('pauseButton').style.display = 'none';
+  document.getElementById('pauseButton').textContent = 'Pause';
+  document.querySelector('.game-container').classList.remove('game-paused');
+}
+
+function gameLoop() {
+  if (!currentPiece) {
+    createPiece();
+    if (!canMove(0, 0)) {
+      gameOver();
+      return;
+    }
+  }
+
+  if (canMove(0, 1)) {
+    currentPiece.y++;
+  } else {
+    mergePiece();
+    clearLines();
+    currentPiece = null;
+    return;
+  }
+
+  clearAllCells();
+  drawGrid();
+  
+  if (currentPiece) {
+    drawCurrentPiece();
+  }
+}
+
+function clearAllCells() {
+  const cells = document.querySelectorAll('.cell');
+  cells.forEach(cell => cell.classList.remove('piece'));
+}
+
+function drawGrid() {
+  for (let i = 0; i < GRID_HEIGHT; i++) {
+    for (let j = 0; j < GRID_WIDTH; j++) {
+      if (grid[i][j]) {
+        const cell = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
+        if (cell) cell.classList.add('piece');
+      }
+    }
+  }
+}
+
+function drawCurrentPiece() {
+  const shape = currentPiece.shape;
+  for (let i = 0; i < shape.length; i++) {
+    for (let j = 0; j < shape[i].length; j++) {
+      if (shape[i][j]) {
+        const y = currentPiece.y + i;
+        const x = currentPiece.x + j;
+        if (y >= 0) {
+          const cell = document.querySelector(`[data-row="${y}"][data-col="${x}"]`);
+          if (cell) cell.classList.add('piece');
+        }
+      }
+    }
+  }
+}
+
+// Add sound functions
+function playMoveSound() {
+  const sound = document.getElementById('moveSound');
+  sound.currentTime = 0;
+  sound.play().catch(e => console.log("Sound play failed:", e));
+}
+
+function playRotateSound() {
+  const sound = document.getElementById('rotateSound');
+  sound.currentTime = 0;
+  sound.play().catch(e => console.log("Sound play failed:", e));
+}
+
+function playDropSound() {
+  const sound = document.getElementById('dropSound');
+  sound.currentTime = 0;
+  sound.play().catch(e => console.log("Sound play failed:", e));
+}
+
+function playClearSound() {
+  const sound = document.getElementById('clearSound');
+  sound.currentTime = 0;
+  sound.play().catch(e => console.log("Sound play failed:", e));
+}
+
+document.addEventListener('keydown', (e) => {
+  if (!gameActive || !currentPiece || isPaused) return;
+  
+  if (['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', 'c', 'C'].includes(e.key)) {
+    e.preventDefault();
+  }
+
+  switch (e.key) {
+    case 'ArrowLeft':
+      if (canMove(-1, 0)) {
+        currentPiece.x--;
+        playMoveSound();
+      }
+      break;
+    case 'ArrowRight':
+      if (canMove(1, 0)) {
+        currentPiece.x++;
+        playMoveSound();
+      }
+      break;
+    case 'ArrowDown':
+      if (canMove(0, 1)) {
+        currentPiece.y++;
+        playDropSound();
+      }
+      break;
+    case 'ArrowUp':
+      if (rotatePiece()) {
+        playRotateSound();
+      }
+      break;
+    case 'c':
+    case 'C':
+      if (holdCurrentPiece()) {
+        playMoveSound();
+      }
+      break;
+  }
+});
+
+document.getElementById('startButton').addEventListener('click', startGame);
+document.getElementById('startAgainButton').addEventListener('click', () => {
+  gameOver();
+  startGame();
+});
+document.getElementById('pauseButton').addEventListener('click', togglePause);
+document.querySelector('.game-container').classList.add('game-inactive');
+createGrid();
+createHoldGrid();
+createNextGrid();
+</script>
+</body></html>
